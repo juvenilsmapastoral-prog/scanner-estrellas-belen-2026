@@ -2,430 +2,364 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escáner QR | Estrellas de Belén 2026</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    :root {
-      --morado: #51236f;
-      --dorado: #d7ad55;
-      --fondo: #f7f4fa;
-      --texto: #292333;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 18px;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--fondo);
-      color: var(--texto);
-    }
-    main { max-width: 560px; margin: 0 auto; }
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 20px;
-      box-shadow: 0 8px 28px #25113718;
-    }
-    h1 {
-      margin: 0;
-      color: var(--morado);
-      font-size: 1.55rem;
-      text-align: center;
-    }
-    .sub {
-      text-align: center;
-      margin: 8px 0 20px;
-      color: #65596e;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin: 16px 0 7px;
-    }
-    select, button {
-      width: 100%;
-      padding: 13px;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
-    select {
-      border: 1px solid #cfc5d8;
-      background: white;
-    }
-    button {
-      border: 0;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 12px;
-    }
-    button:disabled { opacity: .6; cursor: wait; }
-    .primary { background: var(--morado); color: white; }
-    .secondary { background: #eee8f3; color: var(--morado); }
-    #reader {
-      width: 100%;
-      margin-top: 15px;
-      overflow: hidden;
-      border-radius: 12px;
-    }
-    #resultado {
-      display: none;
-      margin-top: 16px;
-      padding: 15px;
-      border-radius: 12px;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-    }
-    #resultado.ok {
-      display: block;
-      background: #e6f5e9;
-      color: #145b2b;
-    }
-    #resultado.error {
-      display: block;
-      background: #fdeaea;
-      color: #8b2020;
-    }
-    #resultado.info {
-      display: block;
-      background: #eee8f8;
-      color: #482365;
-    }
-    .small {
-      font-size: .86rem;
-      color: #665c6e;
-      line-height: 1.45;
-    }
-    .status {
-      text-align: center;
-      margin-top: 12px;
-      font-size: .9rem;
-      color: #65596e;
-    }
-    .hidden { display: none !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estrellas de Belén 2026 - Escáner QR</title>
+
+<style>
+:root {
+  --morado: #51236f;
+  --dorado: #d7ad55;
+  --fondo: #f7f4fa;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 18px;
+  background: var(--fondo);
+  color: #292333;
+  font-family: Arial, sans-serif;
+}
+main { max-width: 560px; margin: auto; }
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px #25113718;
+}
+h1 { color: var(--morado); text-align: center; font-size: 25px; }
+.sub { text-align: center; color: #65596e; }
+label { display: block; font-weight: bold; margin: 18px 0 8px; }
+select, button {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+select { border: 1px solid #ccc; background: white; }
+button { border: 0; font-weight: bold; cursor: pointer; margin-top: 12px; }
+.primary { background: var(--morado); color: white; }
+.secondary { background: #eee8f3; color: var(--morado); }
+button:disabled { opacity: .6; }
+#reader { width: 100%; margin-top: 16px; overflow: hidden; }
+#resultado {
+  display: none;
+  margin-top: 16px;
+  padding: 15px;
+  border-radius: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+#resultado.ok { display: block; background: #e5f5e9; color: #145b2b; }
+#resultado.error { display: block; background: #fdeaea; color: #8b2020; }
+#resultado.info { display: block; background: #eee8f8; color: #482365; }
+#estado { text-align: center; color: #65596e; font-size: 14px; }
+.small { font-size: 13px; color: #65596e; line-height: 1.5; }
+.hidden { display: none !important; }
+</style>
 </head>
+
 <body>
 <main>
-  <section class="card">
-    <h1>⭐ Estrellas de Belén 2026</h1>
-    <p class="sub">Registro de asistencia mediante código QR</p>
+<section class="card">
+  <h1>⭐ Estrellas de Belén 2026</h1>
+  <p class="sub">Control de asistencia mediante QR</p>
 
-    <label for="encuentro">Selecciona el encuentro</label>
-    <select id="encuentro">
-      <option value="">Cargando encuentros…</option>
-    </select>
+  <label for="encuentro">Selecciona el encuentro</label>
+  <select id="encuentro">
+    <option value="">Cargando encuentros...</option>
+  </select>
 
-    <p class="small">
-      Confirma que seleccionaste el encuentro correcto antes de escanear.
-    </p>
+  <p class="small">Comprueba que el encuentro seleccionado sea el correcto antes de escanear.</p>
 
-    <button id="iniciar" class="primary" type="button">
-      Activar cámara y escanear
-    </button>
-    <button id="detener" class="secondary hidden" type="button">
-      Detener cámara
-    </button>
+  <button id="iniciar" class="primary">Activar cámara y escanear</button>
+  <button id="detener" class="secondary hidden">Detener cámara</button>
 
-    <div id="reader"></div>
-    <div id="resultado" role="status" aria-live="polite"></div>
-    <p id="estado" class="status">Conectando con el sistema…</p>
-  </section>
+  <div id="reader"></div>
+  <div id="resultado" role="status" aria-live="polite"></div>
+  <p id="estado">Conectando con el sistema...</p>
+</section>
 </main>
 
 <script>
-  // URL de tu aplicación web de Google Apps Script.
-  const URL_APPS_SCRIPT =
-    'https://script.google.com/macros/s/AKfycby1xFXvat_6bomh1WuZbyul7lopjVazq-8NmjePUpAOooxLa_qRxZ88cp585j5N2BrAtA/exec';
+/* CONFIGURACIÓN */
+const URL_APPS_SCRIPT =
+'https://script.google.com/macros/s/AKfycby1xFXvat_6bomh1WuZbyul7lopjVazq-8NmjePUpAOooxLa_qRxZ88cp585j5N2BrAtA/exec';
 
-  // Debe coincidir con CONFIG.CLAVE en Code.gs.
-  const CLAVE_SISTEMA = 'ESTRELLAS_2026$';
+const CLAVE_SISTEMA = 'ESTRELLAS_2026$';
 
-  const selector = document.getElementById('encuentro');
-  const botonIniciar = document.getElementById('iniciar');
-  const botonDetener = document.getElementById('detener');
-  const resultado = document.getElementById('resultado');
-  const estado = document.getElementById('estado');
+const selector = document.getElementById('encuentro');
+const btnIniciar = document.getElementById('iniciar');
+const btnDetener = document.getElementById('detener');
+const resultado = document.getElementById('resultado');
+const estado = document.getElementById('estado');
 
-  let lector = null;
-  let procesando = false;
-  let ultimoCodigo = '';
-  let ultimoTiempo = 0;
+let lector = null;
+let procesando = false;
+let ultimoCodigo = '';
+let ultimoTiempo = 0;
 
-  function mostrarResultado(tipo, html) {
-    resultado.className = tipo;
-    resultado.innerHTML = html;
-  }
+/* CARGAR LIBRERÍA DESDE DOS SERVIDORES */
+function cargarLibreria() {
+  return new Promise((resolve, reject) => {
+    if (window.Html5Qrcode) {
+      resolve();
+      return;
+    }
 
-  function textoSeguro(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    }[c]));
-  }
+    const fuentes = [
+      'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js'
+    ];
 
-  // Solicita datos al Apps Script usando JSONP.
-  function pedirAPI(parametros) {
-    return new Promise((resolve, reject) => {
-      const callback = 'respuestaQR_' + Date.now() +
-        '_' + Math.floor(Math.random() * 100000);
+    let indice = 0;
+
+    function intentar() {
+      if (window.Html5Qrcode) {
+        resolve();
+        return;
+      }
+
+      if (indice >= fuentes.length) {
+        reject(new Error(
+          'No se pudo cargar la librería QR. Comprueba tu conexión o prueba otra red.'
+        ));
+        return;
+      }
 
       const script = document.createElement('script');
-      let terminado = false;
+      script.src = fuentes[indice++];
+      script.onload = () => {
+        if (window.Html5Qrcode) resolve();
+        else intentar();
+      };
+      script.onerror = intentar;
+      document.head.appendChild(script);
+    }
 
-      const temporizador = setTimeout(() => {
-        terminar(new Error(
-          'Tiempo de espera agotado. Comprueba tu conexión.'
-        ));
-      }, 20000);
+    intentar();
+  });
+}
 
-      function terminar(error, data) {
-        if (terminado) return;
-        terminado = true;
-        clearTimeout(temporizador);
+function mostrar(tipo, mensaje) {
+  resultado.className = tipo;
+  resultado.textContent = mensaje;
+}
 
-        try {
-          delete window[callback];
-        } catch (_) {
-          window[callback] = undefined;
-        }
+function escapar(valor) {
+  return String(valor == null ? '' : valor);
+}
 
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
+/* COMUNICACIÓN CON APPS SCRIPT MEDIANTE JSONP */
+function pedirAPI(parametros) {
+  return new Promise((resolve, reject) => {
+    const callback = 'respuestaQR_' + Date.now() +
+      '_' + Math.floor(Math.random() * 100000);
+    const script = document.createElement('script');
+    let terminado = false;
 
-        if (error) reject(error);
-        else resolve(data);
-      }
+    const temporizador = setTimeout(() => {
+      terminar(new Error('Tiempo de espera agotado al conectar con Apps Script.'));
+    }, 20000);
 
-      window[callback] = data => terminar(null, data);
+    function terminar(error, datos) {
+      if (terminado) return;
+      terminado = true;
+      clearTimeout(temporizador);
+      try { delete window[callback]; } catch (_) {}
+      script.remove();
+      if (error) reject(error);
+      else resolve(datos);
+    }
 
-      const qs = new URLSearchParams({
-        ...parametros,
-        clave: CLAVE_SISTEMA,
-        callback: callback,
-        _: Date.now()
-      });
+    window[callback] = datos => terminar(null, datos);
+    script.onerror = () => terminar(new Error(
+      'Error al conectar con Apps Script. Comprueba la implementación web.'
+    ));
 
-      script.onerror = () => terminar(new Error(
-        'No se pudo conectar con Apps Script. Verifica que esté ' +
-        'implementado como aplicación web.'
-      ));
-
-      script.src = URL_APPS_SCRIPT + '?' + qs.toString();
-      document.body.appendChild(script);
+    const consulta = new URLSearchParams({
+      ...parametros,
+      clave: CLAVE_SISTEMA,
+      callback,
+      _: Date.now()
     });
-  }
 
-  async function cargarEncuentros() {
-    try {
-      const data = await pedirAPI({ accion: 'encuentros' });
+    script.src = URL_APPS_SCRIPT + '?' + consulta.toString();
+    document.body.appendChild(script);
+  });
+}
 
-      if (data.estado !== 'OK') {
-        throw new Error(
-          data.mensaje || 'No se pudieron cargar los encuentros.'
-        );
-      }
+/* LISTA DE ENCUENTROS */
+async function cargarEncuentros() {
+  try {
+    const datos = await pedirAPI({ accion: 'encuentros' });
 
-      selector.innerHTML =
-        '<option value="">— Selecciona un encuentro —</option>';
-
-      (data.encuentros || []).forEach(e => {
-        const opcion = document.createElement('option');
-        opcion.value = e.id;
-        opcion.textContent =
-          `${e.id} · ${e.nombre}` +
-          `${e.fecha ? ' · ' + e.fecha : ''} · ${e.estado}`;
-        selector.appendChild(opcion);
-      });
-
-      estado.textContent =
-        'Sistema conectado. Selecciona el encuentro para comenzar.';
-
-    } catch (err) {
-      selector.innerHTML =
-        '<option value="">No se pudieron cargar los encuentros</option>';
-
-      estado.textContent = err.message;
-      mostrarResultado('error', textoSeguro(err.message));
-    }
-  }
-
-  // Obtiene el código desde el contenido del QR.
-  function extraerCodigo(valor) {
-    const raw = String(valor || '').trim();
-
-    try {
-      if (/^https?:\/\//i.test(raw)) {
-        const url = new URL(raw);
-        const codigo =
-          url.searchParams.get('codigo') ||
-          url.searchParams.get('qr') ||
-          url.searchParams.get('id');
-
-        if (codigo) return codigo.trim();
-      }
-    } catch (_) {}
-
-    return raw;
-  }
-
-  async function registrarCodigo(valor) {
-    const codigo = extraerCodigo(valor);
-    const ahora = Date.now();
-
-    if (!codigo || procesando ||
-        (codigo === ultimoCodigo && ahora - ultimoTiempo < 4000)) {
-      return;
+    if (datos.estado !== 'OK') {
+      throw new Error(datos.mensaje || 'No se pudieron cargar los encuentros.');
     }
 
-    procesando = true;
-    ultimoCodigo = codigo;
-    ultimoTiempo = ahora;
+    selector.innerHTML = '<option value="">— Selecciona un encuentro —</option>';
 
-    try {
-      if (!selector.value) {
-        throw new Error('Selecciona un encuentro antes de escanear.');
-      }
+    (datos.encuentros || []).forEach(e => {
+      const opcion = document.createElement('option');
+      opcion.value = e.id;
+      opcion.textContent =
+        e.id + ' · ' + e.nombre +
+        (e.fecha ? ' · ' + e.fecha : '') +
+        ' · ' + e.estado;
+      selector.appendChild(opcion);
+    });
 
-      estado.textContent = 'Verificando código…';
+    estado.textContent = 'Conectado. Selecciona un encuentro.';
 
-      const data = await pedirAPI({
-        codigo: codigo,
-        encuentro: selector.value
-      });
-
-      const persona = [data.nombres, data.apellidos]
-        .filter(Boolean)
-        .map(textoSeguro)
-        .join(' ');
-
-      const evento = textoSeguro(data.encuentro || selector.value);
-
-      if (data.estado === 'OK') {
-        mostrarResultado(
-          'ok',
-          `<strong>✓ ASISTENCIA REGISTRADA</strong><br>` +
-          `${persona || 'Participante'}<br>` +
-          `Encuentro: ${evento}<br>` +
-          `Fecha: ${textoSeguro(data.fecha || '')} ` +
-          `${textoSeguro(data.hora || '')}<br>` +
-          `${textoSeguro(data.mensaje || '')}`
-        );
-
-        estado.textContent = 'Registro completado.';
-
-      } else if (data.estado === 'DUPLICADO') {
-        mostrarResultado(
-          'info',
-          `<strong>⚠ YA ESTABA REGISTRADO</strong><br>` +
-          `${persona || 'Participante'}<br>` +
-          `Encuentro: ${evento}<br>` +
-          `${textoSeguro(data.mensaje || '')}`
-        );
-
-        estado.textContent =
-          'No se añadió una asistencia duplicada.';
-
-      } else {
-        mostrarResultado(
-          'error',
-          `<strong>✕ NO SE REGISTRÓ</strong><br>` +
-          `${textoSeguro(data.mensaje || 'Código no válido.')}`
-        );
-
-        estado.textContent =
-          'Revisa el mensaje antes de continuar.';
-      }
-
-    } catch (err) {
-      mostrarResultado(
-        'error',
-        `<strong>✕ ERROR</strong><br>` +
-        `${textoSeguro(err.message || err)}`
-      );
-
-      estado.textContent = 'No se pudo completar el registro.';
-
-    } finally {
-      setTimeout(() => {
-        procesando = false;
-      }, 1200);
-    }
+  } catch (error) {
+    selector.innerHTML = '<option value="">Error al cargar encuentros</option>';
+    estado.textContent = error.message;
+    mostrar('error', error.message);
   }
+}
 
-  async function iniciarCamara() {
+/* EXTRAER CÓDIGO QR */
+function extraerCodigo(valor) {
+  const contenido = String(valor || '').trim();
+
+  try {
+    if (/^https?:\/\//i.test(contenido)) {
+      const url = new URL(contenido);
+      const codigo = url.searchParams.get('codigo') ||
+        url.searchParams.get('qr') ||
+        url.searchParams.get('id');
+
+      if (codigo) return codigo.trim();
+    }
+  } catch (_) {}
+
+  return contenido;
+}
+
+/* REGISTRAR ASISTENCIA */
+async function registrarCodigo(valor) {
+  const codigo = extraerCodigo(valor);
+  const ahora = Date.now();
+
+  if (!codigo || procesando ||
+      (codigo === ultimoCodigo && ahora - ultimoTiempo < 4000)) return;
+
+  procesando = true;
+  ultimoCodigo = codigo;
+  ultimoTiempo = ahora;
+
+  try {
     if (!selector.value) {
-      mostrarResultado(
-        'error',
-        'Primero selecciona el encuentro.'
-      );
-      return;
+      throw new Error('Selecciona primero un encuentro.');
     }
 
-    if (!window.Html5Qrcode) {
-      mostrarResultado(
-        'error',
-        'No se cargó la librería del escáner. Comprueba tu conexión.'
+    estado.textContent = 'Verificando QR...';
+
+    const datos = await pedirAPI({
+      codigo,
+      encuentro: selector.value
+    });
+
+    const persona = [datos.nombres, datos.apellidos]
+      .filter(Boolean).map(escapar).join(' ');
+
+    if (datos.estado === 'OK') {
+      mostrar('ok',
+        '✓ ASISTENCIA REGISTRADA\n' +
+        (persona || 'Participante') + '\n' +
+        'Encuentro: ' + escapar(datos.encuentro || selector.value) + '\n' +
+        'Fecha: ' + escapar(datos.fecha || '') + ' ' +
+        escapar(datos.hora || '') + '\n' +
+        escapar(datos.mensaje || '')
       );
-      return;
+      estado.textContent = 'Registro completado.';
+
+    } else if (datos.estado === 'DUPLICADO') {
+      mostrar('info',
+        '⚠ ASISTENCIA YA REGISTRADA\n' +
+        (persona || 'Participante') + '\n' +
+        'Encuentro: ' + escapar(datos.encuentro || selector.value) + '\n' +
+        escapar(datos.mensaje || '')
+      );
+      estado.textContent = 'No se añadió una asistencia duplicada.';
+
+    } else {
+      mostrar('error',
+        '✕ NO SE REGISTRÓ\n' +
+        escapar(datos.mensaje || 'Código QR no válido.')
+      );
+      estado.textContent = 'Revisa el mensaje.';
     }
 
-    botonIniciar.disabled = true;
+  } catch (error) {
+    mostrar('error', '✕ ERROR\n' + escapar(error.message || error));
+    estado.textContent = 'No se pudo completar el registro.';
+  } finally {
+    setTimeout(() => { procesando = false; }, 1200);
+  }
+}
 
-    try {
-      lector = new Html5Qrcode('reader');
-
-      await lector.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        registrarCodigo,
-        () => {}
-      );
-
-      botonIniciar.classList.add('hidden');
-      botonDetener.classList.remove('hidden');
-
-      estado.textContent =
-        'Cámara activa. Apunta al código QR del participante.';
-
-    } catch (err) {
-      mostrarResultado(
-        'error',
-        'No se pudo activar la cámara. Abre el enlace HTTPS ' +
-        'y acepta el permiso de cámara.'
-      );
-
-      estado.textContent = String(err.message || err);
-
-    } finally {
-      botonIniciar.disabled = false;
-    }
+/* CÁMARA */
+async function iniciarCamara() {
+  if (!selector.value) {
+    mostrar('error', 'Primero selecciona un encuentro.');
+    return;
   }
 
-  async function detenerCamara() {
-    if (lector) {
-      try {
-        if (lector.isScanning) await lector.stop();
-        await lector.clear();
-      } catch (_) {}
+  btnIniciar.disabled = true;
 
+  try {
+    await cargarLibreria();
+
+    lector = new Html5Qrcode('reader');
+
+    await lector.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      registrarCodigo,
+      () => {}
+    );
+
+    btnIniciar.classList.add('hidden');
+    btnDetener.classList.remove('hidden');
+    estado.textContent = 'Cámara activa. Apunta al QR del participante.';
+
+  } catch (error) {
+    if (lector) {
+      try { await lector.clear(); } catch (_) {}
       lector = null;
     }
 
-    botonIniciar.classList.remove('hidden');
-    botonDetener.classList.add('hidden');
-    estado.textContent = 'Cámara detenida.';
+    mostrar('error',
+      'No se pudo iniciar el escáner. ' +
+      escapar(error.message || error) +
+      ' Verifica que la página use HTTPS y que hayas permitido la cámara.'
+    );
+    estado.textContent = 'No se pudo activar la cámara.';
+  } finally {
+    btnIniciar.disabled = false;
+  }
+}
+
+async function detenerCamara() {
+  if (lector) {
+    try {
+      if (lector.isScanning) await lector.stop();
+      await lector.clear();
+    } catch (_) {}
+    lector = null;
   }
 
-  botonIniciar.addEventListener('click', iniciarCamara);
-  botonDetener.addEventListener('click', detenerCamara);
+  btnIniciar.classList.remove('hidden');
+  btnDetener.classList.add('hidden');
+  estado.textContent = 'Cámara detenida.';
+}
 
-  cargarEncuentros();
+btnIniciar.addEventListener('click', iniciarCamara);
+btnDetener.addEventListener('click', detenerCamara);
+
+cargarEncuentros();
 </script>
 </body>
 </html>
