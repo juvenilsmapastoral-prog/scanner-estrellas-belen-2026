@@ -1,0 +1,1 @@
+# scanner-estrellas-belen-2026
