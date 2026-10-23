@@ -1,538 +1,346 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estrellas de Belén 2026 | Asistencia</title>
-
+<title>Estrella de Belén 2026 | Asistencia</title>
 <style>
-:root {
-  --morado: #51236f;
-  --dorado: #d7ad55;
-  --fondo: #f7f4fa;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 18px;
-  font-family: Arial, Helvetica, sans-serif;
-  background: var(--fondo);
-  color: #292333;
-}
-main { max-width: 560px; margin: auto; }
-.card {
-  background: white;
-  padding: 22px;
-  border-radius: 18px;
-  box-shadow: 0 8px 28px #25113718;
-}
-h1 {
-  color: var(--morado);
-  text-align: center;
-  font-size: 25px;
-}
-.sub { text-align: center; color: #65596e; }
-label {
-  display: block;
-  font-weight: bold;
-  margin: 18px 0 8px;
-}
-input, select, button {
-  width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 16px;
-}
-input, select {
-  border: 1px solid #cfc5d8;
-  background: white;
-}
-button {
-  border: 0;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 12px;
-}
-button:disabled { opacity: .6; cursor: wait; }
-.primary { background: var(--morado); color: white; }
-.secondary { background: #eee8f3; color: var(--morado); }
-#reader { width: 100%; margin-top: 16px; overflow: hidden; }
-#resultado {
-  display: none;
-  margin-top: 16px;
-  padding: 15px;
-  border-radius: 10px;
-  line-height: 1.5;
-  white-space: pre-line;
-  overflow-wrap: anywhere;
-}
-#resultado.ok { display: block; background: #e5f5e9; color: #145b2b; }
-#resultado.error { display: block; background: #fdeaea; color: #8b2020; }
-#resultado.info { display: block; background: #eee8f8; color: #482365; }
-.small { font-size: 13px; color: #65596e; line-height: 1.5; }
-.status { text-align: center; color: #65596e; font-size: 14px; }
-.hidden { display: none !important; }
-#loginMensaje { color: #8b2020; font-size: 14px; }
+:root{--azul:#0f2748;--azul2:#183a68;--dorado:#d7ad55;--rojo:#c62828;--fondo:#0f2748}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(#0f2748,#183a68);min-height:100vh;color:#22304a}
+main{max-width:520px;margin:auto}
+.card{background:#fff;padding:20px;border-radius:18px;box-shadow:0 10px 30px #0006;border-top:5px solid var(--dorado)}
+.logo{display:block;width:150px;max-width:55%;margin:-6px auto 4px;border-radius:50%}
+h1{margin:0;text-align:center;color:var(--azul);font-size:21px}
+.sub{text-align:center;color:#6b7a90;margin:4px 0 8px;font-size:14px}
+label{display:block;font-weight:bold;margin:14px 0 6px;font-size:14px}
+input,select,button{width:100%;padding:13px;border-radius:10px;font-size:16px}
+input,select{border:1px solid #c5cfdd;background:#fff}
+button{border:0;font-weight:bold;cursor:pointer;margin-top:10px}
+button:disabled{opacity:.6;cursor:wait}
+.primary{background:var(--azul);color:#fff}
+.gold{background:var(--dorado);color:#102b4e}
+.secondary{background:#e8edf5;color:var(--azul)}
+.danger{background:#fdeaea;color:#8b2020}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.bar{display:flex;justify-content:space-between;align-items:center;background:#f1f4f9;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:8px}
+.bar b{color:var(--azul)}
+.bar button{width:auto;margin:0;padding:7px 12px;font-size:13px}
+#reader{width:100%;margin-top:14px;overflow:hidden;border-radius:12px}
+#resultado{display:none;margin-top:14px;padding:16px;border-radius:12px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;font-size:17px;text-align:center}
+#resultado.ok{display:block;background:#e3f6e8;color:#12592a}
+#resultado.error{display:block;background:#fdeaea;color:#8b2020}
+#resultado.info{display:block;background:#fff5da;color:#7a5a00}
+.small{font-size:13px;color:#6b7a90;line-height:1.5}
+.status{text-align:center;color:#6b7a90;font-size:14px}
+.msg{color:#8b2020;font-size:14px;min-height:18px}
+details{margin-top:14px;background:#f7f9fc;border-radius:10px;padding:10px 12px}
+summary{font-weight:bold;cursor:pointer;color:var(--azul)}
+.hidden{display:none!important}
 </style>
 </head>
-
 <body>
-<main>
-<section class="card">
-  <h1>⭐ Estrellas de Belén 2026</h1>
-  <p class="sub">Sistema de control de asistencia</p>
+<main><section class="card">
+  <img class="logo" src="logo.png" alt="Estrella de Belén 2026" onerror="this.style.display='none'">
+  <h1>Estrella de Belén 2026</h1>
+  <p class="sub">Control de asistencia</p>
 
-  <!-- ACCESO PARA ENCARGADOS -->
+  <!-- LOGIN -->
   <div id="loginBox">
-    <label for="contrasena">Contraseña de encargado</label>
-    <input
-      id="contrasena"
-      type="password"
-      autocomplete="current-password"
-      placeholder="Escribe la contraseña"
-    >
-    <button id="btnAcceder" class="primary" type="button">
-      Entrar al escáner
-    </button>
-    <p id="loginMensaje" role="status" aria-live="polite"></p>
-    <p class="small">
-      Solo los encargados autorizados deben utilizar este sistema.
-    </p>
+    <label for="usuario">Usuario</label>
+    <input id="usuario" autocomplete="username" autocapitalize="characters" placeholder="Ej: MUSICA">
+    <label for="contrasena">Contraseña</label>
+    <input id="contrasena" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+    <button id="btnAcceder" class="primary" type="button">Entrar</button>
+    <p id="loginMensaje" class="msg" role="status" aria-live="polite"></p>
   </div>
 
-  <!-- ESCÁNER PROTEGIDO -->
-  <div id="panelEscaner" class="hidden">
-    <label for="encuentro">Selecciona el encuentro</label>
-    <select id="encuentro">
-      <option value="">Inicia sesión para cargar encuentros</option>
-    </select>
+  <!-- CAMBIO DE CONTRASEÑA OBLIGATORIO -->
+  <div id="cambioBox" class="hidden">
+    <p class="small"><b>Por seguridad, crea tu propia contraseña</b> (mínimo 8 caracteres).</p>
+    <label for="claveActual">Contraseña actual</label>
+    <input id="claveActual" type="password" autocomplete="current-password">
+    <label for="claveNueva">Nueva contraseña</label>
+    <input id="claveNueva" type="password" autocomplete="new-password">
+    <button id="btnCambiar" class="gold" type="button">Guardar contraseña</button>
+    <p id="cambioMensaje" class="msg"></p>
+  </div>
 
-    <p class="small">
-      Comprueba que seleccionaste el encuentro correcto antes de escanear.
-    </p>
+  <!-- PANEL -->
+  <div id="panel" class="hidden">
+    <div class="bar"><span>👤 <b id="quien"></b> · <span id="rol"></span></span>
+      <button id="cerrarSesion" class="secondary" type="button">Salir</button></div>
 
-    <button id="iniciar" class="primary" type="button">
-      Activar cámara y escanear
-    </button>
-    <button id="detener" class="secondary hidden" type="button">
-      Detener cámara
-    </button>
-    <button id="cerrarSesion" class="secondary" type="button">
-      Cerrar sesión
-    </button>
+    <label for="encuentro">Encuentro</label>
+    <select id="encuentro"><option value="">Cargando…</option></select>
+    <p class="small">Verifica que sea el encuentro correcto antes de escanear.</p>
+
+    <button id="iniciar" class="primary" type="button">📷 Activar cámara y escanear</button>
+    <button id="detener" class="secondary hidden" type="button">Detener cámara</button>
 
     <div id="reader"></div>
     <div id="resultado" role="status" aria-live="polite"></div>
     <p id="estado" class="status"></p>
+    <p class="status">Escaneos en esta sesión: <b id="contador">0</b></p>
+
+    <details id="admin" class="hidden">
+      <summary>Gestión de encuentros</summary>
+      <label for="nuevoNombre">Nombre del nuevo encuentro</label>
+      <input id="nuevoNombre" placeholder="Ej: Encuentro 5 - Ensayo general">
+      <label for="nuevaFecha">Fecha</label>
+      <input id="nuevaFecha" type="date">
+      <button id="btnCrear" class="gold" type="button">Crear encuentro</button>
+      <button id="btnCerrarEnc" class="danger" type="button">Cerrar el encuentro seleccionado</button>
+    </details>
   </div>
-</section>
-</main>
+</section></main>
 
 <script>
 'use strict';
+const URL_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycby1xFXvat_6bomh1WuZbyul7lopjVazq-8NmjePUpAOooxLa_qRxZ88cp585j5N2BrAtA/exec';
+const $ = id => document.getElementById(id);
 
-/* CONFIGURACIÓN DE TU APLICACIÓN */
-const URL_APPS_SCRIPT =
-'https://script.google.com/macros/s/AKfycby1xFXvat_6bomh1WuZbyul7lopjVazq-8NmjePUpAOooxLa_qRxZ88cp585j5N2BrAtA/exec';
+let token = sessionStorage.getItem('eb_tk') || '';
+let user = null;
+try { user = JSON.parse(sessionStorage.getItem('eb_us') || 'null'); } catch (_) {}
+let lector = null, procesando = false, ultimoCodigo = '', ultimoTiempo = 0, total = 0;
 
-/*
-  La contraseña NO se guarda en este HTML.
-  Se valida con CONFIG.CLAVE del Apps Script.
-*/
-let claveActual = '';
-
-const selector = document.getElementById('encuentro');
-const loginBox = document.getElementById('loginBox');
-const panelEscaner = document.getElementById('panelEscaner');
-const inputContrasena = document.getElementById('contrasena');
-const btnAcceder = document.getElementById('btnAcceder');
-const loginMensaje = document.getElementById('loginMensaje');
-const btnCerrarSesion = document.getElementById('cerrarSesion');
-const botonIniciar = document.getElementById('iniciar');
-const botonDetener = document.getElementById('detener');
-const resultado = document.getElementById('resultado');
-const estado = document.getElementById('estado');
-
-let lector = null;
-let procesando = false;
-let ultimoCodigo = '';
-let ultimoTiempo = 0;
-
-/* CARGA DEL LECTOR QR DESDE DOS SERVIDORES */
-function cargarLibreriaQR() {
+/* ---------- API (JSONP) ---------- */
+function api(p) {
   return new Promise((resolve, reject) => {
-    if (window.Html5Qrcode) {
-      resolve();
-      return;
+    const cb = 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1e5);
+    const s = document.createElement('script');
+    let fin = false;
+    const t = setTimeout(() => terminar(new Error('Tiempo agotado. Revisa tu conexión.')), 20000);
+    function terminar(err, d) {
+      if (fin) return; fin = true; clearTimeout(t);
+      try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+      if (s.parentNode) s.parentNode.removeChild(s);
+      err ? reject(err) : resolve(d);
     }
-
-    const fuentes = [
-      'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
-      'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'
-    ];
-
-    let indice = 0;
-
-    function intentar() {
-      if (window.Html5Qrcode) {
-        resolve();
-        return;
-      }
-
-      if (indice >= fuentes.length) {
-        reject(new Error(
-          'No se pudo cargar el lector QR. Comprueba tu conexión a internet.'
-        ));
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = fuentes[indice++];
-      script.onload = () => {
-        if (window.Html5Qrcode) resolve();
-        else intentar();
-      };
-      script.onerror = intentar;
-      document.head.appendChild(script);
-    }
-
-    intentar();
+    window[cb] = d => terminar(null, d);
+    s.onerror = () => terminar(new Error('No se pudo conectar con el servidor.'));
+    s.src = URL_APPS_SCRIPT + '?' + new URLSearchParams({ ...p, token, callback: cb, _: Date.now() });
+    document.body.appendChild(s);
   });
 }
 
-/* MENSAJES */
-function mostrar(tipo, mensaje) {
-  resultado.className = tipo;
-  resultado.textContent = mensaje;
+/* ---------- Pantallas ---------- */
+function pantalla(cual) {
+  ['loginBox', 'cambioBox', 'panel'].forEach(x => $(x).classList.toggle('hidden', x !== cual));
+}
+function mostrar(tipo, msg) { $('resultado').className = tipo; $('resultado').textContent = msg; }
+function guardarSesion() {
+  sessionStorage.setItem('eb_tk', token);
+  sessionStorage.setItem('eb_us', JSON.stringify(user));
+}
+function salirLocal(msg) {
+  token = ''; user = null; sessionStorage.clear();
+  pantalla('loginBox');
+  $('loginMensaje').textContent = msg || '';
+  $('resultado').className = ''; $('resultado').textContent = '';
 }
 
-function escapar(valor) {
-  return String(valor == null ? '' : valor);
+async function entrar() {
+  if (!token || !user) return salirLocal();
+  if (user.cambio) { pantalla('cambioBox'); return; }
+  $('quien').textContent = user.nombre;
+  $('rol').textContent = user.rol + (user.area ? ' · ' + user.area : '');
+  $('admin').classList.toggle('hidden', user.rol === 'ENCARGADO');
+  pantalla('panel');
+  await cargarEncuentros();
 }
 
-/* CONSULTA SEGURA DEL ENDPOINT MEDIANTE JSONP */
-function pedirAPI(parametros, clave = claveActual) {
-  return new Promise((resolve, reject) => {
-    const callback = 'respuestaQR_' +
-      Date.now() + '_' + Math.floor(Math.random() * 100000);
-
-    const script = document.createElement('script');
-    let terminado = false;
-
-    const temporizador = setTimeout(() => {
-      terminar(new Error(
-        'Tiempo agotado. Comprueba tu conexión y la implementación de Apps Script.'
-      ));
-    }, 20000);
-
-    function terminar(error, datos) {
-      if (terminado) return;
-      terminado = true;
-      clearTimeout(temporizador);
-
-      try {
-        delete window[callback];
-      } catch (_) {
-        window[callback] = undefined;
-      }
-
-      if (script.parentNode) script.parentNode.removeChild(script);
-
-      if (error) reject(error);
-      else resolve(datos);
-    }
-
-    window[callback] = datos => terminar(null, datos);
-
-    const consulta = new URLSearchParams({
-      ...parametros,
-      clave: clave,
-      callback: callback,
-      _: Date.now()
-    });
-
-    script.onerror = () => terminar(new Error(
-      'No se pudo conectar con Apps Script. Verifica que esté implementado como aplicación web.'
-    ));
-
-    script.src = URL_APPS_SCRIPT + '?' + consulta.toString();
-    document.body.appendChild(script);
-  });
-}
-
-/* VALIDAR CONTRASEÑA CON EL SERVIDOR */
 async function iniciarSesion() {
-  const clave = inputContrasena.value;
-
-  if (!clave) {
-    loginMensaje.textContent = 'Escribe la contraseña.';
-    return;
-  }
-
-  btnAcceder.disabled = true;
-  loginMensaje.textContent = 'Verificando acceso...';
-
+  const usuario = $('usuario').value.trim(), clave = $('contrasena').value;
+  if (!usuario || !clave) { $('loginMensaje').textContent = 'Escribe usuario y contraseña.'; return; }
+  $('btnAcceder').disabled = true;
+  $('loginMensaje').textContent = 'Verificando…';
   try {
-    const datos = await pedirAPI(
-      { codigo: '__VERIFICAR_ACCESO__' },
-      clave
-    );
-
-    if (datos.estado !== 'OK') {
-      throw new Error(datos.mensaje || 'Contraseña incorrecta.');
-    }
-
-    claveActual = clave;
-    inputContrasena.value = '';
-    loginMensaje.textContent = '';
-    loginBox.classList.add('hidden');
-    panelEscaner.classList.remove('hidden');
-
-    await cargarEncuentros();
-
-  } catch (error) {
-    claveActual = '';
-    loginMensaje.textContent =
-      error.message || 'No se pudo validar el acceso.';
-  } finally {
-    btnAcceder.disabled = false;
-  }
+    const d = await api({ accion: 'login', usuario, clave });
+    if (d.estado !== 'OK') throw new Error(d.mensaje);
+    token = d.token; user = d.usuario; guardarSesion();
+    $('contrasena').value = '';
+    $('loginMensaje').textContent = '';
+    await entrar();
+  } catch (e) { $('loginMensaje').textContent = e.message; }
+  finally { $('btnAcceder').disabled = false; }
 }
 
-/* CARGAR ENCUENTROS DISPONIBLES */
-async function cargarEncuentros() {
+async function cambiarClave() {
+  $('btnCambiar').disabled = true;
   try {
-    const datos = await pedirAPI({ accion: 'encuentros' });
+    const d = await api({ accion: 'cambiarclave', actual: $('claveActual').value, nueva: $('claveNueva').value });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    if (d.estado !== 'OK') throw new Error(d.mensaje);
+    user = d.usuario; guardarSesion();
+    $('claveActual').value = ''; $('claveNueva').value = ''; $('cambioMensaje').textContent = '';
+    await entrar();
+  } catch (e) { $('cambioMensaje').textContent = e.message; }
+  finally { $('btnCambiar').disabled = false; }
+}
 
-    if (datos.estado !== 'OK') {
-      throw new Error(
-        datos.mensaje || 'No se pudieron cargar los encuentros.'
-      );
-    }
-
-    selector.innerHTML =
-      '<option value="">— Selecciona un encuentro —</option>';
-
-    (datos.encuentros || []).forEach(e => {
-      const opcion = document.createElement('option');
-      opcion.value = e.id;
-      opcion.textContent =
-        e.id + ' · ' + e.nombre +
-        (e.fecha ? ' · ' + e.fecha : '') +
-        ' · ' + e.estado;
-
-      selector.appendChild(opcion);
+/* ---------- Encuentros ---------- */
+async function cargarEncuentros(seleccionar) {
+  try {
+    const d = await api({ accion: 'encuentros' });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    if (d.estado !== 'OK') throw new Error(d.mensaje);
+    const sel = $('encuentro');
+    sel.innerHTML = '<option value="">— Selecciona un encuentro —</option>';
+    (d.encuentros || []).forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.id;
+      o.textContent = e.id + ' · ' + e.nombre + (e.fecha ? ' · ' + e.fecha : '') + ' · ' + e.estado;
+      sel.appendChild(o);
     });
-
-    estado.textContent =
-      'Acceso autorizado. Selecciona el encuentro.';
-
-  } catch (error) {
-    selector.innerHTML =
-      '<option value="">Error al cargar encuentros</option>';
-
-    estado.textContent = error.message;
-    mostrar('error', error.message);
+    if (seleccionar) sel.value = seleccionar;
+    $('estado').textContent = 'Selecciona el encuentro y activa la cámara.';
+  } catch (e) {
+    $('encuentro').innerHTML = '<option value="">Error al cargar</option>';
+    mostrar('error', e.message);
   }
 }
 
-/* EXTRAER EL IDENTIFICADOR DEL QR */
-function extraerCodigo(valor) {
-  const contenido = String(valor || '').trim();
-
+async function crearEncuentro() {
+  $('btnCrear').disabled = true;
   try {
-    if (/^https?:\/\//i.test(contenido)) {
-      const url = new URL(contenido);
-      const codigo =
-        url.searchParams.get('codigo') ||
-        url.searchParams.get('qr') ||
-        url.searchParams.get('id');
+    const d = await api({ accion: 'crearencuentro', nombre: $('nuevoNombre').value, fecha: $('nuevaFecha').value });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    mostrar(d.estado === 'OK' ? 'ok' : 'error', d.mensaje);
+    if (d.estado === 'OK') { $('nuevoNombre').value = ''; await cargarEncuentros(); }
+  } catch (e) { mostrar('error', e.message); }
+  finally { $('btnCrear').disabled = false; }
+}
 
-      if (codigo) return codigo.trim();
+async function cerrarEncuentro() {
+  const id = $('encuentro').value;
+  if (!id) return mostrar('error', 'Selecciona el encuentro que quieres cerrar.');
+  if (!confirm('¿Cerrar el encuentro ' + id + '? Ya no se podrá registrar asistencia.')) return;
+  try {
+    const d = await api({ accion: 'cerrarencuentro', encuentro: id });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    mostrar(d.estado === 'OK' ? 'ok' : 'error', d.mensaje);
+    if (d.estado === 'OK') await cargarEncuentros();
+  } catch (e) { mostrar('error', e.message); }
+}
+
+/* ---------- Escaneo ---------- */
+function extraerCodigo(v) {
+  const c = String(v || '').trim();
+  try {
+    if (/^https?:\/\//i.test(c)) {
+      const u = new URL(c);
+      const x = u.searchParams.get('codigo') || u.searchParams.get('qr') || u.searchParams.get('id');
+      if (x) return x.trim();
     }
   } catch (_) {}
-
-  return contenido;
+  return c;
 }
 
-/* REGISTRAR ASISTENCIA */
-async function registrarCodigo(valor) {
-  const codigo = extraerCodigo(valor);
-  const ahora = Date.now();
-
-  if (!codigo || procesando ||
-      (codigo === ultimoCodigo && ahora - ultimoTiempo < 4000)) {
-    return;
-  }
-
-  procesando = true;
-  ultimoCodigo = codigo;
-  ultimoTiempo = ahora;
-
+function aviso(ok) {
+  try { navigator.vibrate && navigator.vibrate(ok ? 120 : [100, 60, 100]); } catch (_) {}
   try {
-    if (!claveActual) {
-      throw new Error('La sesión no está autorizada. Inicia sesión nuevamente.');
-    }
-
-    if (!selector.value) {
-      throw new Error('Selecciona primero un encuentro.');
-    }
-
-    estado.textContent = 'Verificando código QR...';
-
-    const datos = await pedirAPI({
-      codigo: codigo,
-      encuentro: selector.value
-    });
-
-    const persona = [
-      datos.nombres,
-      datos.apellidos
-    ].filter(Boolean).map(escapar).join(' ');
-
-    const encuentro = escapar(datos.encuentro || selector.value);
-
-    if (datos.estado === 'OK') {
-      mostrar('ok',
-        '✓ ASISTENCIA REGISTRADA\n' +
-        (persona || 'Participante') + '\n' +
-        'Encuentro: ' + encuentro + '\n' +
-        'Fecha: ' + escapar(datos.fecha || '') + ' ' +
-        escapar(datos.hora || '') + '\n' +
-        escapar(datos.mensaje || '')
-      );
-
-      estado.textContent = 'Registro completado.';
-
-    } else if (datos.estado === 'DUPLICADO') {
-      mostrar('info',
-        '⚠ ASISTENCIA YA REGISTRADA\n' +
-        (persona || 'Participante') + '\n' +
-        'Encuentro: ' + encuentro + '\n' +
-        escapar(datos.mensaje || '')
-      );
-
-      estado.textContent = 'No se añadió una asistencia duplicada.';
-
-    } else {
-      mostrar('error',
-        '✕ NO SE REGISTRÓ\n' +
-        escapar(datos.mensaje || 'Código QR no válido.')
-      );
-
-      estado.textContent = 'Revisa el mensaje antes de continuar.';
-    }
-
-  } catch (error) {
-    mostrar('error', 'ERROR: ' + escapar(error.message || error));
-    estado.textContent = 'No se pudo completar el registro.';
-  } finally {
-    setTimeout(() => {
-      procesando = false;
-    }, 1200);
-  }
+    const a = new (window.AudioContext || window.webkitAudioContext)();
+    const o = a.createOscillator(), g = a.createGain();
+    o.connect(g); g.connect(a.destination);
+    o.frequency.value = ok ? 880 : 300; g.gain.value = 0.15;
+    o.start(); o.stop(a.currentTime + 0.15);
+  } catch (_) {}
 }
 
-/* ACTIVAR CÁMARA */
+async function registrarCodigo(valor) {
+  const codigo = extraerCodigo(valor), ahora = Date.now();
+  if (!codigo || procesando || (codigo === ultimoCodigo && ahora - ultimoTiempo < 4000)) return;
+  procesando = true; ultimoCodigo = codigo; ultimoTiempo = ahora;
+  try {
+    if (!$('encuentro').value) throw new Error('Selecciona primero un encuentro.');
+    $('estado').textContent = 'Verificando código QR…';
+    const d = await api({ accion: 'escanear', codigo, encuentro: $('encuentro').value });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    const persona = [d.nombres, d.apellidos].filter(Boolean).join(' ') || 'Participante';
+    if (d.estado === 'OK') {
+      total++; $('contador').textContent = total; aviso(true);
+      mostrar('ok', '✓ ASISTENCIA REGISTRADA\n' + persona + '\n' + d.encuentro + '\n' + d.fecha + ' ' + d.hora);
+      $('estado').textContent = 'Listo para el siguiente.';
+    } else if (d.estado === 'DUPLICADO') {
+      aviso(false);
+      mostrar('info', '⚠ YA REGISTRADO\n' + persona + '\n' + d.encuentro);
+      $('estado').textContent = 'No se duplicó la asistencia.';
+    } else {
+      aviso(false);
+      mostrar('error', '✕ NO SE REGISTRÓ\n' + (d.mensaje || 'Código QR no válido.'));
+      $('estado').textContent = 'Revisa el mensaje.';
+    }
+  } catch (e) {
+    aviso(false);
+    mostrar('error', 'ERROR: ' + (e.message || e));
+    $('estado').textContent = 'No se pudo completar el registro.';
+  } finally { setTimeout(() => { procesando = false; }, 1200); }
+}
+
+function cargarLibreriaQR() {
+  return new Promise((resolve, reject) => {
+    if (window.Html5Qrcode) return resolve();
+    const fuentes = ['https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+      'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'];
+    let i = 0;
+    (function intentar() {
+      if (window.Html5Qrcode) return resolve();
+      if (i >= fuentes.length) return reject(new Error('No se pudo cargar el lector QR. Revisa tu internet.'));
+      const s = document.createElement('script');
+      s.src = fuentes[i++];
+      s.onload = () => window.Html5Qrcode ? resolve() : intentar();
+      s.onerror = intentar;
+      document.head.appendChild(s);
+    })();
+  });
+}
+
 async function iniciarCamara() {
-  if (!claveActual) {
-    mostrar('error', 'Inicia sesión para utilizar el escáner.');
-    return;
-  }
-
-  if (!selector.value) {
-    mostrar('error', 'Primero selecciona un encuentro.');
-    return;
-  }
-
-  botonIniciar.disabled = true;
-  estado.textContent = 'Cargando lector QR...';
-
+  if (!$('encuentro').value) return mostrar('error', 'Primero selecciona un encuentro.');
+  $('iniciar').disabled = true;
+  $('estado').textContent = 'Cargando lector QR…';
   try {
     await cargarLibreriaQR();
-
     lector = new Html5Qrcode('reader');
-
-    await lector.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      registrarCodigo,
-      () => {}
-    );
-
-    botonIniciar.classList.add('hidden');
-    botonDetener.classList.remove('hidden');
-
-    estado.textContent =
-      'Cámara activa. Apunta al QR del participante.';
-
-  } catch (error) {
-    if (lector) {
-      try {
-        if (lector.isScanning) await lector.stop();
-        await lector.clear();
-      } catch (_) {}
-      lector = null;
-    }
-
-    mostrar('error',
-      'No se pudo iniciar el escáner. ' +
-      escapar(error.message || error) +
-      ' Verifica el HTTPS y el permiso de cámara.'
-    );
-
-    estado.textContent = 'No se pudo activar la cámara.';
-
-  } finally {
-    botonIniciar.disabled = false;
-  }
+    await lector.start({ facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } }, registrarCodigo, () => {});
+    $('iniciar').classList.add('hidden');
+    $('detener').classList.remove('hidden');
+    $('estado').textContent = '🟢 Cámara activa. Apunta al QR.';
+  } catch (e) {
+    if (lector) { try { if (lector.isScanning) await lector.stop(); await lector.clear(); } catch (_) {} lector = null; }
+    mostrar('error', 'No se pudo iniciar la cámara. Permite el acceso a la cámara en tu navegador y abre la página con HTTPS.\n' + (e.message || e));
+    $('estado').textContent = '🔴 Cámara no disponible.';
+  } finally { $('iniciar').disabled = false; }
 }
 
-/* DETENER CÁMARA */
 async function detenerCamara() {
-  if (lector) {
-    try {
-      if (lector.isScanning) await lector.stop();
-      await lector.clear();
-    } catch (_) {}
-
-    lector = null;
-  }
-
-  botonIniciar.classList.remove('hidden');
-  botonDetener.classList.add('hidden');
-  estado.textContent = 'Cámara detenida.';
+  if (lector) { try { if (lector.isScanning) await lector.stop(); await lector.clear(); } catch (_) {} lector = null; }
+  $('iniciar').classList.remove('hidden');
+  $('detener').classList.add('hidden');
+  $('estado').textContent = 'Cámara detenida.';
 }
 
-/* CERRAR SESIÓN */
 async function cerrarSesion() {
   await detenerCamara();
-
-  claveActual = '';
-  selector.innerHTML =
-    '<option value="">Inicia sesión para cargar encuentros</option>';
-
-  panelEscaner.classList.add('hidden');
-  loginBox.classList.remove('hidden');
-  loginMensaje.textContent = 'Sesión cerrada.';
-  estado.textContent = '';
-  resultado.className = '';
-  resultado.textContent = '';
-  inputContrasena.value = '';
+  try { await api({ accion: 'cerrarsesion' }); } catch (_) {}
+  total = 0; $('contador').textContent = 0;
+  salirLocal('Sesión cerrada.');
 }
 
-/* EVENTOS */
-btnAcceder.addEventListener('click', iniciarSesion);
-
-inputContrasena.addEventListener('keydown', evento => {
-  if (evento.key === 'Enter') iniciarSesion();
-});
-
-botonIniciar.addEventListener('click', iniciarCamara);
-botonDetener.addEventListener('click', detenerCamara);
-btnCerrarSesion.addEventListener('click', cerrarSesion);
+/* ---------- Eventos ---------- */
+$('btnAcceder').addEventListener('click', iniciarSesion);
+$('contrasena').addEventListener('keydown', e => { if (e.key === 'Enter') iniciarSesion(); });
+$('btnCambiar').addEventListener('click', cambiarClave);
+$('iniciar').addEventListener('click', iniciarCamara);
+$('detener').addEventListener('click', detenerCamara);
+$('cerrarSesion').addEventListener('click', cerrarSesion);
+$('btnCrear').addEventListener('click', crearEncuentro);
+$('btnCerrarEnc').addEventListener('click', cerrarEncuentro);
+entrar();
 </script>
+  
 </body>
 </html>
-
