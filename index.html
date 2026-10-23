@@ -36,6 +36,16 @@ button:disabled{opacity:.6;cursor:wait}
 .msg{color:#8b2020;font-size:14px;min-height:18px}
 details{margin-top:14px;background:#f7f9fc;border-radius:10px;padding:10px 12px}
 summary{font-weight:bold;cursor:pointer;color:var(--azul)}
+.fila{background:#fff;border:1px solid #dde4ef;border-radius:10px;padding:10px;margin-top:8px;font-size:14px}
+.ft{font-weight:bold;color:var(--azul);margin-bottom:6px;overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.tag.on{background:#e3f6e8;color:#12592a}.tag.off{background:#eee;color:#666}
+.fila button{margin-top:4px;padding:10px;font-size:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.st{background:#f1f4f9;border-radius:10px;padding:8px 2px;text-align:center}
+.st b{display:block;font-size:22px;color:var(--azul)}
+.st span{font-size:11px;color:#6b7a90}
+.fila .x{width:auto;float:right;margin:0;padding:4px 10px;font-size:12px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -83,14 +93,34 @@ summary{font-weight:bold;cursor:pointer;color:var(--azul)}
     <p id="estado" class="status"></p>
     <p class="status">Escaneos en esta sesión: <b id="contador">0</b></p>
 
+    <div id="dash" class="hidden">
+      <div class="grid4">
+        <div class="st"><b id="sIns">0</b><span>Inscritos</span></div>
+        <div class="st"><b id="sPres">0</b><span>Presentes</span></div>
+        <div class="st"><b id="sPend">0</b><span>Faltan</span></div>
+        <div class="st"><b id="sPct">0%</b><span>Asistencia</span></div>
+      </div>
+      <p id="sTipos" class="small" style="text-align:center"></p>
+      <div class="ft">Últimos registrados</div>
+      <div id="ultimos" class="small"></div>
+    </div>
+
     <details id="admin" class="hidden">
-      <summary>Gestión de encuentros</summary>
+      <summary>⚙️ Gestión de encuentros</summary>
+      <div id="listaEnc" class="small">Cargando…</div>
+      <button id="btnPDFGeneral" class="secondary" type="button">📊 PDF general (todos los encuentros)</button>
+      <label>➕ Crear un encuentro nuevo</label>
       <label for="nuevoNombre">Nombre del nuevo encuentro</label>
       <input id="nuevoNombre" placeholder="Ej: Encuentro 5 - Ensayo general">
       <label for="nuevaFecha">Fecha</label>
       <input id="nuevaFecha" type="date">
       <button id="btnCrear" class="gold" type="button">Crear encuentro</button>
-      <button id="btnCerrarEnc" class="danger" type="button">Cerrar el encuentro seleccionado</button>
+    </details>
+
+    <details id="panelLinea" class="hidden">
+      <summary>🟢 Quiénes están en línea</summary>
+      <div id="listaLinea" class="small">Abre este panel para ver quién está conectado.</div>
+      <button id="btnLinea" class="secondary" type="button">Actualizar</button>
     </details>
   </div>
 </section></main>
@@ -135,6 +165,7 @@ function guardarSesion() {
   sessionStorage.setItem('eb_us', JSON.stringify(user));
 }
 function salirLocal(msg) {
+  detenerLatido();
   token = ''; user = null; sessionStorage.clear();
   pantalla('loginBox');
   $('loginMensaje').textContent = msg || '';
@@ -147,7 +178,9 @@ async function entrar() {
   $('quien').textContent = user.nombre;
   $('rol').textContent = user.rol + (user.area ? ' · ' + user.area : '');
   $('admin').classList.toggle('hidden', user.rol === 'ENCARGADO');
+  $('panelLinea').classList.toggle('hidden', user.rol !== 'ADMIN');
   pantalla('panel');
+  iniciarLatido();
   await cargarEncuentros();
 }
 
@@ -183,17 +216,24 @@ async function cambiarClave() {
 /* ---------- Encuentros ---------- */
 async function cargarEncuentros(seleccionar) {
   try {
-    const d = await api({ accion: 'encuentros' });
+    const d = await api({ accion: 'encuentros', todos: '1' });
     if (d.estado === 'SESION') return salirLocal(d.mensaje);
     if (d.estado !== 'OK') throw new Error(d.mensaje);
     const sel = $('encuentro');
     sel.innerHTML = '<option value="">— Selecciona un encuentro —</option>';
     (d.encuentros || []).forEach(e => {
+      if (String(e.estado).toUpperCase() !== 'ACTIVO') return;
       const o = document.createElement('option');
       o.value = e.id;
-      o.textContent = e.id + ' · ' + e.nombre + (e.fecha ? ' · ' + e.fecha : '') + ' · ' + e.estado;
+      o.textContent = e.id + ' · ' + e.nombre + (e.fecha ? ' · ' + e.fecha : '');
       sel.appendChild(o);
     });
+    renderLista(d.encuentros || []);
+    if (sel.options.length === 1) {
+      sel.options[0].textContent = user.rol === 'ENCARGADO'
+        ? 'No hay encuentros activos (pide a un coordinador que cree uno)'
+        : 'No hay encuentros: créalo en "Gestión de encuentros"';
+    }
     if (seleccionar) sel.value = seleccionar;
     $('estado').textContent = 'Selecciona el encuentro y activa la cámara.';
   } catch (e) {
@@ -238,14 +278,27 @@ function extraerCodigo(v) {
   return c;
 }
 
-function aviso(ok) {
-  try { navigator.vibrate && navigator.vibrate(ok ? 120 : [100, 60, 100]); } catch (_) {}
+let audioCtx = null;
+function desbloquearAudio() {
   try {
-    const a = new (window.AudioContext || window.webkitAudioContext)();
-    const o = a.createOscillator(), g = a.createGain();
-    o.connect(g); g.connect(a.destination);
-    o.frequency.value = ok ? 880 : 300; g.gain.value = 0.15;
-    o.start(); o.stop(a.currentTime + 0.15);
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (_) {}
+}
+function tono(f, ini, dur, tipo, vol) {
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = tipo; o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
+  const t = audioCtx.currentTime + ini;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur);
+}
+function aviso(ok) {
+  try { navigator.vibrate && navigator.vibrate(ok ? 120 : [150, 80, 150, 80, 150]); } catch (_) {}
+  try {
+    desbloquearAudio();
+    if (ok) { tono(880, 0, 0.12, 'sine', 0.3); tono(1320, 0.12, 0.25, 'sine', 0.3); }       // ding-ding agudo
+    else { tono(220, 0, 0.25, 'sawtooth', 0.25); tono(150, 0.28, 0.4, 'sawtooth', 0.25); } // zumbido grave
   } catch (_) {}
 }
 
@@ -261,8 +314,9 @@ async function registrarCodigo(valor) {
     const persona = [d.nombres, d.apellidos].filter(Boolean).join(' ') || 'Participante';
     if (d.estado === 'OK') {
       total++; $('contador').textContent = total; aviso(true);
-      mostrar('ok', '✓ ASISTENCIA REGISTRADA\n' + persona + '\n' + d.encuentro + '\n' + d.fecha + ' ' + d.hora);
+      mostrar('ok', '✓ ASISTENCIA REGISTRADA\n' + persona + (d.tipo ? ' (' + d.tipo + ')' : '') + '\n' + d.encuentro + '\n' + d.fecha + ' ' + d.hora);
       $('estado').textContent = 'Listo para el siguiente.';
+      cargarPanel();
     } else if (d.estado === 'DUPLICADO') {
       aviso(false);
       mostrar('info', '⚠ YA REGISTRADO\n' + persona + '\n' + d.encuentro);
@@ -299,6 +353,7 @@ function cargarLibreriaQR() {
 
 async function iniciarCamara() {
   if (!$('encuentro').value) return mostrar('error', 'Primero selecciona un encuentro.');
+  desbloquearAudio();
   $('iniciar').disabled = true;
   $('estado').textContent = 'Cargando lector QR…';
   try {
@@ -309,6 +364,7 @@ async function iniciarCamara() {
     $('iniciar').classList.add('hidden');
     $('detener').classList.remove('hidden');
     $('estado').textContent = '🟢 Cámara activa. Apunta al QR.';
+    latido();
   } catch (e) {
     if (lector) { try { if (lector.isScanning) await lector.stop(); await lector.clear(); } catch (_) {} lector = null; }
     mostrar('error', 'No se pudo iniciar la cámara. Permite el acceso a la cámara en tu navegador y abre la página con HTTPS.\n' + (e.message || e));
@@ -321,6 +377,7 @@ async function detenerCamara() {
   $('iniciar').classList.remove('hidden');
   $('detener').classList.add('hidden');
   $('estado').textContent = 'Cámara detenida.';
+  latido();
 }
 
 async function cerrarSesion() {
@@ -328,6 +385,136 @@ async function cerrarSesion() {
   try { await api({ accion: 'cerrarsesion' }); } catch (_) {}
   total = 0; $('contador').textContent = 0;
   salirLocal('Sesión cerrada.');
+}
+
+/* ---------- Reportes PDF ---------- */
+async function descargarPDF(id) {
+  const btn = { disabled: false };
+  mostrar('info', 'Generando PDF… puede tardar unos segundos.');
+  try {
+    const d = await api({ accion: 'reportepdf', encuentro: id || 'TODOS' });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    if (d.estado !== 'OK') throw new Error(d.mensaje);
+    const bytes = Uint8Array.from(atob(d.pdf), c => c.charCodeAt(0));
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = d.archivo;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    mostrar('ok', '✓ PDF generado\n' + d.archivo);
+  } catch (e) { mostrar('error', 'No se pudo generar el PDF: ' + (e.message || e)); }
+  finally { btn.disabled = false; }
+}
+
+/* ---------- Lista de encuentros: activar / desactivar / PDF ---------- */
+function renderLista(lista) {
+  const box = $('listaEnc');
+  box.innerHTML = '';
+  if (!lista.length) { box.textContent = 'Aún no hay encuentros. Crea el primero abajo.'; return; }
+  lista.forEach(e => {
+    const activo = String(e.estado).toUpperCase() === 'ACTIVO';
+    const fila = document.createElement('div'); fila.className = 'fila';
+    const t = document.createElement('div'); t.className = 'ft';
+    t.textContent = e.id + ' · ' + e.nombre + (e.fecha ? ' · ' + e.fecha : '');
+    const tag = document.createElement('span');
+    tag.className = 'tag ' + (activo ? 'on' : 'off');
+    tag.textContent = activo ? 'ACTIVO' : 'DESACTIVADO';
+    t.appendChild(tag);
+    const fb = document.createElement('div'); fb.className = 'row';
+    const b1 = document.createElement('button');
+    b1.type = 'button'; b1.className = activo ? 'danger' : 'primary';
+    b1.textContent = activo ? '⏸ Desactivar' : '▶ Activar';
+    b1.onclick = () => cambiarEstado(e.id, !activo);
+    const b2 = document.createElement('button');
+    b2.type = 'button'; b2.className = 'gold'; b2.textContent = '📄 PDF';
+    b2.onclick = () => descargarPDF(e.id);
+    fb.appendChild(b1); fb.appendChild(b2);
+    fila.appendChild(t); fila.appendChild(fb);
+    box.appendChild(fila);
+  });
+}
+
+async function cambiarEstado(id, activar) {
+  if (!activar && !confirm('¿Desactivar ' + id + '? No se podrá escanear en él hasta activarlo de nuevo.')) return;
+  try {
+    const d = await api({ accion: 'estadoencuentro', encuentro: id, estado: activar ? 'Activo' : 'Cerrado' });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    mostrar(d.estado === 'OK' ? 'ok' : 'error', d.mensaje);
+    if (d.estado === 'OK') await cargarEncuentros($('encuentro').value);
+  } catch (e) { mostrar('error', e.message); }
+}
+
+/* ---------- Presencia: quién está en línea (el ADMIN lo consulta) ---------- */
+let timerLatido = null, timerLinea = null;
+async function latido() {
+  if (!token) return;
+  cargarPanel();
+  try { await api({ accion: 'latido', cam: lector ? '1' : '0', encuentro: $('encuentro').value }); } catch (_) {}
+}
+function iniciarLatido() { detenerLatido(); latido(); timerLatido = setInterval(latido, 45000); }
+function detenerLatido() {
+  if (timerLatido) clearInterval(timerLatido);
+  if (timerLinea) clearInterval(timerLinea);
+  timerLatido = timerLinea = null;
+}
+async function cargarLinea() {
+  const box = $('listaLinea');
+  try {
+    const d = await api({ accion: 'enlinea' });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    if (d.estado !== 'OK') { box.textContent = d.mensaje; return; }
+    box.innerHTML = '';
+    if (!d.lista.length) { box.textContent = 'Nadie conectado en este momento.'; return; }
+    d.lista.forEach(x => {
+      const f = document.createElement('div'); f.className = 'fila';
+      f.textContent = (x.escaneando ? '🟢 Escaneando' : '🟡 Conectado') + ' · ' + x.nombre +
+        ' (' + x.usuario + ')' + (x.encuentro ? ' · ' + x.encuentro : '') + ' · hace ' + x.hace + ' s';
+      box.appendChild(f);
+    });
+  } catch (e) { box.textContent = e.message; }
+}
+
+/* ---------- Panel en vivo y anulación ---------- */
+async function cargarPanel() {
+  const id = $('encuentro').value;
+  $('dash').classList.toggle('hidden', !id);
+  if (!id || !token) return;
+  try {
+    const d = await api({ accion: 'panel', encuentro: id });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    if (d.estado !== 'OK') return;
+    $('sIns').textContent = d.inscritos;
+    $('sPres').textContent = d.presentes;
+    $('sPend').textContent = Math.max(d.inscritos - d.presentes, 0);
+    $('sPct').textContent = (d.inscritos ? Math.round(d.presentes * 100 / d.inscritos) : 0) + '%';
+    $('sTipos').textContent = 'Encargados: ' + d.encargados.presentes + ' de ' + d.encargados.inscritos +
+      ' · Participantes: ' + d.participantes.presentes + ' de ' + d.participantes.inscritos;
+    const box = $('ultimos');
+    box.innerHTML = '';
+    if (!d.ultimos.length) { box.textContent = 'Aún no hay asistencias en este encuentro.'; return; }
+    d.ultimos.forEach(x => {
+      const f = document.createElement('div'); f.className = 'fila';
+      f.textContent = x.hora + ' · ' + x.nombre + ' · ' + x.tipo;
+      if (user && user.rol !== 'ENCARGADO') {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'danger x'; b.textContent = '✕ Anular';
+        b.onclick = () => anularAsistencia(x.codigo, x.nombre);
+        f.appendChild(b);
+      }
+      box.appendChild(f);
+    });
+  } catch (_) {}
+}
+
+async function anularAsistencia(codigo, nombre) {
+  const motivo = prompt('Anular la asistencia de ' + nombre + '.\nEscribe el motivo (queda registrado):');
+  if (!motivo) return;
+  try {
+    const d = await api({ accion: 'anular', codigo: codigo, encuentro: $('encuentro').value, motivo: motivo });
+    if (d.estado === 'SESION') return salirLocal(d.mensaje);
+    mostrar(d.estado === 'OK' ? 'ok' : 'error', d.mensaje);
+    cargarPanel();
+  } catch (e) { mostrar('error', e.message); }
 }
 
 /* ---------- Eventos ---------- */
@@ -338,9 +525,17 @@ $('iniciar').addEventListener('click', iniciarCamara);
 $('detener').addEventListener('click', detenerCamara);
 $('cerrarSesion').addEventListener('click', cerrarSesion);
 $('btnCrear').addEventListener('click', crearEncuentro);
-$('btnCerrarEnc').addEventListener('click', cerrarEncuentro);
+$('btnPDFGeneral').addEventListener('click', () => descargarPDF('TODOS'));
+$('btnLinea').addEventListener('click', cargarLinea);
+$('encuentro').addEventListener('change', () => {
+  latido();
+  if ($('encuentro').value && !lector) iniciarCamara();
+});
+$('panelLinea').addEventListener('toggle', () => {
+  if (timerLinea) { clearInterval(timerLinea); timerLinea = null; }
+  if ($('panelLinea').open) { cargarLinea(); timerLinea = setInterval(cargarLinea, 20000); }
+});
 entrar();
 </script>
-  
 </body>
 </html>
